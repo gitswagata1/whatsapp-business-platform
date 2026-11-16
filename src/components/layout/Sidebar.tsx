@@ -50,7 +50,7 @@ export default function Sidebar() {
     window.location.href = "/login";
   };
 
-  const NavItem = ({ item }: { item: { name: string; href: string; icon: React.ComponentType<{ size?: number; className?: string }>; badge?: boolean } }) => {
+  const renderNavItem = (item: { name: string; href: string; icon: React.ComponentType<{ size?: number; className?: string }>; badge?: boolean }) => {
     const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
     return (
       <Link
@@ -74,14 +74,14 @@ export default function Sidebar() {
     );
   };
 
-  const NavSection = ({ title, items }: { title: string; items: typeof mainNav }) => (
+  const renderNavSection = (title: string, items: typeof mainNav) => (
     <div className="mb-4">
       <p className="px-3 mb-1.5 text-[10px] font-semibold text-gray-500 uppercase tracking-wider">
         {title}
       </p>
       <div className="space-y-0.5">
         {items.map((item) => (
-          <NavItem key={item.name} item={item} />
+          renderNavItem(item)
         ))}
       </div>
     </div>
@@ -131,15 +131,15 @@ export default function Sidebar() {
 
         {/* Navigation */}
         <nav className="flex-1 px-3 py-4 overflow-y-auto space-y-1">
-          <NavSection title="Main" items={mainNav} />
-          <NavSection title="Automation" items={automationNav} />
-          <NavSection title="Insights" items={insightsNav} />
+          {renderNavSection("Main", mainNav)}
+          {renderNavSection("Automation", automationNav)}
+          {renderNavSection("Insights", insightsNav)}
 
           <div className="mb-4">
             <p className="px-3 mb-1.5 text-[10px] font-semibold text-gray-500 uppercase tracking-wider">
               System
             </p>
-            <NavItem item={{ name: "Settings", href: "/settings", icon: Settings }} />
+            {renderNavItem({ name: "Settings", href: "/settings", icon: Settings })}
           </div>
         </nav>
 

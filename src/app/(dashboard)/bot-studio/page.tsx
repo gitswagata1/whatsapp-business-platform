@@ -121,7 +121,7 @@ export default function BotStudioPage() {
   const addNode = (type: string) => {
     if (!activeFlow) return;
     const newNode: BotNode = {
-      id: Date.now().toString(),
+      id: crypto.randomUUID(),
       type: type as BotNode["type"],
       title: NODE_TYPES.find((n) => n.type === type)?.label || "New Node",
       config: {},

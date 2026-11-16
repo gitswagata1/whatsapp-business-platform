@@ -103,6 +103,7 @@ export default function InboxPage() {
   }, [statusFilter, assignFilter, search]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch on mount; state is set after the request resolves
     fetchConversations();
     const interval = setInterval(fetchConversations, 5000);
     return () => clearInterval(interval);
@@ -123,13 +124,6 @@ export default function InboxPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  useEffect(() => {
-    if (newMessage.startsWith("/")) {
-      setShowQuickReplies(true);
-    } else {
-      setShowQuickReplies(false);
-    }
-  }, [newMessage]);
 
   const sendMessage = async () => {
     if (!newMessage.trim() || !selectedId || sending) return;
@@ -483,7 +477,10 @@ export default function InboxPage() {
                   <input
                     type="text"
                     value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
+                    onChange={(e) => {
+                      setNewMessage(e.target.value);
+                      setShowQuickReplies(e.target.value.startsWith("/"));
+                    }}
                     onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendMessage()}
                     placeholder="Type a message or / for quick replies..."
                     className="flex-1 px-4 py-2.5 bg-gray-50 rounded-full text-sm outline-none focus:ring-2 focus:ring-emerald-500/30 focus:bg-white border border-transparent focus:border-emerald-200 transition text-gray-900"
