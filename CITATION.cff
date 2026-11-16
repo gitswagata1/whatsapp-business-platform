@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "WhatsApp Business Platform"
+abstract: "A multi-tenant WhatsApp Business platform with team inbox, template broadcasts and AI agents, built on the WhatsApp Cloud API."
+type: software
+authors:
+  - family-names: "Banerjee"
+    given-names: "Swagata"
+repository-code: "https://github.com/gitswagata1/whatsapp-business-platform"
+license: MIT
+version: "1.0.0"
+date-released: "2026-11-16"
+keywords:
+  - whatsapp
+  - crm
+  - ai-agents
+  - nextjs
+  - prisma

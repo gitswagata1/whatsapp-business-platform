@@ -9,6 +9,7 @@ broadcasts, AI auto-reply agents with governance, and analytics.
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
 ![Prisma](https://img.shields.io/badge/Prisma-6-2D3748?logo=prisma&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?logo=postgresql&logoColor=white)
+[![CI](https://github.com/gitswagata1/whatsapp-business-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/gitswagata1/whatsapp-business-platform/actions/workflows/ci.yml)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
 </div>
@@ -25,6 +26,9 @@ broadcasts, AI auto-reply agents with governance, and analytics.
 - [Data model](#data-model)
 - [Scripts](#scripts)
 - [Security](#security)
+- [Roadmap](#roadmap)
+- [Contributing](#contributing)
+- [Citation](#citation)
 - [License](#license)
 
 ## Features
@@ -155,9 +159,27 @@ Core Prisma models: `Organization`, `User`, `WhatsAppAccount`, `Contact`, `Tag`,
 ## Security
 
 - The app refuses to start without `NEXTAUTH_SECRET`; there is no default key.
+- CI runs type checking, linting and a production build on every pull request.
 - Passwords are hashed with bcrypt. Never commit `.env` files.
 - Protected routes are enforced in `src/middleware.ts`; only login, register and the
   webhook are public.
+
+## Roadmap
+
+Planned work, ideas for taking the project further and open research questions are in
+[ROADMAP.md](ROADMAP.md). Good first tasks are labelled
+[`good first issue`](https://github.com/gitswagata1/whatsapp-business-platform/labels/good%20first%20issue).
+
+## Contributing
+
+Contributions are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) and the
+[Code of Conduct](CODE_OF_CONDUCT.md) first. To report a vulnerability, follow
+[SECURITY.md](SECURITY.md).
+
+## Citation
+
+If you use this project in research or a product, you can cite it using
+[CITATION.cff](CITATION.cff) (GitHub shows a "Cite this repository" button).
 
 ## License
 
