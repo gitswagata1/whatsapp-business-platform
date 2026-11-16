@@ -1,0 +1,290 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String
+  password      String
+  role          String    @default("AGENT")
+  avatar        String?
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  organizationId String
+  organization  Organization @relation(fields: [organizationId], references: [id])
+  assignedChats Conversation[] @relation("AssignedAgent")
+  messages      Message[]
+  notes         Note[]
+  broadcasts    Broadcast[]
+
+  @@index([organizationId])
+}
+
+model Organization {
+  id            String    @id @default(cuid())
+  name          String
+  plan          String    @default("STARTER")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  users         User[]
+  whatsappAccounts WhatsAppAccount[]
+  contacts      Contact[]
+  conversations Conversation[]
+  broadcasts    Broadcast[]
+  templates     Template[]
+  aiAgents      AIAgent[]
+  tags          Tag[]
+  customFields  CustomFieldDef[]
+  quickReplies  QuickReply[]
+  workingHours  WorkingHours[]
+}
+
+model WhatsAppAccount {
+  id              String   @id @default(cuid())
+  phoneNumber     String   @unique
+  phoneNumberId   String   @unique
+  wabaId          String
+  businessName    String?
+  accessToken     String
+  webhookSecret   String?
+  isActive        Boolean  @default(true)
+  qualityRating   String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id])
+  conversations   Conversation[]
+  broadcasts      Broadcast[]
+  templates       Template[]
+
+  @@index([organizationId])
+}
+
+model Contact {
+  id              String   @id @default(cuid())
+  phoneNumber     String
+  name            String?
+  email           String?
+  avatar          String?
+  source          String?
+  isOptedIn       Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id])
+  conversations   Conversation[]
+  tags            ContactTag[]
+  customFields    CustomFieldValue[]
+  broadcastRecipients BroadcastRecipient[]
+
+  @@unique([phoneNumber, organizationId])
+  @@index([organizationId])
+}
+
+model Tag {
+  id              String   @id @default(cuid())
+  name            String
+  color           String   @default("#6366f1")
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id])
+  contacts        ContactTag[]
+
+  @@unique([name, organizationId])
+}
+
+model ContactTag {
+  contactId String
+  tagId     String
+  contact   Contact @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  tag       Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([contactId, tagId])
+}
+
+model CustomFieldDef {
+  id              String   @id @default(cuid())
+  name            String
+  type            String   @default("TEXT")
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id])
+  values          CustomFieldValue[]
+
+  @@unique([name, organizationId])
+}
+
+model CustomFieldValue {
+  id         String   @id @default(cuid())
+  value      String
+  contactId  String
+  fieldId    String
+  contact    Contact        @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  field      CustomFieldDef @relation(fields: [fieldId], references: [id], onDelete: Cascade)
+
+  @@unique([contactId, fieldId])
+}
+
+model Conversation {
+  id              String   @id @default(cuid())
+  status          String   @default("OPEN")
+  lastMessageAt   DateTime?
+  unreadCount     Int      @default(0)
+  isAIHandled     Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime  @updatedAt
+  contactId       String
+  contact         Contact  @relation(fields: [contactId], references: [id])
+  assignedToId    String?
+  assignedTo      User?    @relation("AssignedAgent", fields: [assignedToId], references: [id])
+  whatsappAccountId String
+  whatsappAccount WhatsAppAccount @relation(fields: [whatsappAccountId], references: [id])
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id])
+  messages        Message[]
+  notes           Note[]
+
+  @@unique([contactId, whatsappAccountId])
+  @@index([organizationId, status])
+  @@index([assignedToId])
+  @@index([lastMessageAt])
+}
+
+model Message {
+  id              String   @id @default(cuid())
+  waMessageId     String?  @unique
+  type            String   @default("TEXT")
+  content         String
+  mediaUrl        String?
+  mediaType       String?
+  direction       String
+  status          String   @default("SENT")
+  timestamp       DateTime @default(now())
+  conversationId  String
+  conversation    Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId        String?
+  sender          User?    @relation(fields: [senderId], references: [id])
+  isAIGenerated   Boolean  @default(false)
+
+  @@index([conversationId, timestamp])
+}
+
+model Note {
+  id              String   @id @default(cuid())
+  content         String
+  createdAt       DateTime @default(now())
+  conversationId  String
+  conversation    Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  userId          String
+  user            User     @relation(fields: [userId], references: [id])
+}
+
+model Template {
+  id              String   @id @default(cuid())
+  name            String
+  language        String   @default("en")
+  category        String
+  status          String   @default("PENDING")
+  headerType      String?
+  headerContent   String?
+  body            String
+  footer          String?
+  buttons         Json?
+  waTemplateId    String?
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id])
+  whatsappAccountId String?
+  whatsappAccount WhatsAppAccount? @relation(fields: [whatsappAccountId], references: [id])
+  broadcasts      Broadcast[]
+
+  @@unique([name, organizationId])
+}
+
+model Broadcast {
+  id              String   @id @default(cuid())
+  name            String
+  status          String   @default("DRAFT")
+  scheduledAt     DateTime?
+  sentAt          DateTime?
+  completedAt     DateTime?
+  totalRecipients Int      @default(0)
+  sent            Int      @default(0)
+  delivered       Int      @default(0)
+  read            Int      @default(0)
+  replied         Int      @default(0)
+  failed          Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  templateId      String
+  template        Template @relation(fields: [templateId], references: [id])
+  whatsappAccountId String
+  whatsappAccount WhatsAppAccount @relation(fields: [whatsappAccountId], references: [id])
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id])
+  createdById     String
+  createdBy       User     @relation(fields: [createdById], references: [id])
+  recipients      BroadcastRecipient[]
+
+  @@index([organizationId, status])
+}
+
+model BroadcastRecipient {
+  id           String   @id @default(cuid())
+  status       String   @default("PENDING")
+  sentAt       DateTime?
+  deliveredAt  DateTime?
+  readAt       DateTime?
+  failReason   String?
+  broadcastId  String
+  broadcast    Broadcast @relation(fields: [broadcastId], references: [id], onDelete: Cascade)
+  contactId    String
+  contact      Contact  @relation(fields: [contactId], references: [id])
+
+  @@unique([broadcastId, contactId])
+}
+
+model AIAgent {
+  id              String   @id @default(cuid())
+  name            String
+  description     String?
+  systemPrompt    String?
+  knowledgeBase   String?
+  isActive        Boolean  @default(true)
+  model           String   @default("claude-sonnet-4-20250514")
+  temperature     Float    @default(0.7)
+  maxTokens       Int      @default(1024)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id])
+
+  @@index([organizationId])
+}
+
+model QuickReply {
+  id              String   @id @default(cuid())
+  shortcut        String
+  message         String
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id])
+
+  @@unique([shortcut, organizationId])
+}
+
+model WorkingHours {
+  id              String   @id @default(cuid())
+  dayOfWeek       Int
+  startTime       String
+  endTime         String
+  isActive        Boolean  @default(true)
+  autoReplyMessage String?
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id])
+
+  @@unique([dayOfWeek, organizationId])
+}
