@@ -2,10 +2,9 @@ import { prisma } from "./prisma";
 import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
 import { SignJWT, jwtVerify } from "jose";
+import { getAuthSecret } from "./secret";
 
-const SECRET = new TextEncoder().encode(
-  process.env.NEXTAUTH_SECRET || "fallback-secret-change-me"
-);
+const SECRET = getAuthSecret();
 
 export type SessionUser = {
   id: string;

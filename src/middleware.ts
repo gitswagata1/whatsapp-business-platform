@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
+import { getAuthSecret } from "@/lib/secret";
 
-const SECRET = new TextEncoder().encode(
-  process.env.NEXTAUTH_SECRET || "fallback-secret-change-me"
-);
+const SECRET = getAuthSecret();
 
 const publicPaths = ["/login", "/register", "/api/auth/login", "/api/auth/register", "/api/whatsapp/webhook"];
 
